@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import random
+import time
 
 # Значения карт для подсчета по системе Hi-Lo
 CARD_VALUES = {
@@ -18,6 +19,7 @@ class CardCountingTrainer:
         self.root.title("Card Counting Trainer")
 
         self.current_card = None
+        self.card_number = 0
         self.running_count = 0
         self.auto_playing = False
 
@@ -25,12 +27,15 @@ class CardCountingTrainer:
         self.deck = []
         self.generate_deck()
 
+        self.start_time = None
+        self.card_times = []
+
         # Карточный интерфейс
         self.card_image_label = tk.Label(root)
         self.card_image_label.pack(pady=20)
 
-        self.count_label = tk.Label(root, text="Running Count: 0", font=("Helvetica", 16))
-        self.count_label.pack(pady=10)
+        self.card_number_label = tk.Label(root, text="Card Number: 0", font=("Helvetica", 16))
+        self.card_number_label.pack(pady=10)
 
         # Кнопка для показа новой карты
         self.new_card_button = tk.Button(root, text="Show New Card", command=self.show_new_card)
@@ -72,6 +77,10 @@ class CardCountingTrainer:
         self.restart_button = tk.Button(root, text="Restart", command=self.restart)
         self.restart_button.pack(pady=10)
 
+        # Кнопка для отображения статистики
+        self.stats_button = tk.Button(root, text="Show Stats", command=self.show_stats)
+        self.stats_button.pack(pady=10)
+
     def generate_deck(self):
         """Создает колоду на основе количества выбранных колод."""
         self.deck = [f"{card}_of_{suit}" for card in CARDS for suit in SUITS] * self.deck_count
@@ -96,9 +105,19 @@ class CardCountingTrainer:
             self.result_label.config(text="Deck is empty! Restart or add more decks.", fg="red")
             return
 
+        if self.start_time is None:
+            self.start_time = time.time()
+
+        if self.card_number > 0:
+            self.card_times.append(time.time() - self.start_time)
+
+        self.start_time = time.time()
+
         card = self.deck.pop()
+        self.card_number += 1
+
         card_value = card.split("_of_")[0]
-        self.running_count += CARD_VALUES[card_value]
+        self.running_count += CARD_VALUES.get(card_value, 0)
 
         # Загрузка изображения карты
         try:
@@ -111,7 +130,7 @@ class CardCountingTrainer:
             self.card_image_label.config(text="Image not found", font=("Helvetica", 16))
 
         self.result_label.config(text="")
-        self.count_label.config(text=f"Running Count: {self.running_count}")
+        self.card_number_label.config(text=f"Card Number: {self.card_number}")
 
     def check_count(self):
         """Проверить правильность текущего счета."""
@@ -146,14 +165,40 @@ class CardCountingTrainer:
 
     def restart(self):
         """Перезапустить тренировку."""
+        self.card_number = 0
         self.running_count = 0
         self.auto_playing = False
+        self.start_time = None
+        self.card_times = []
         self.generate_deck()
         self.card_image_label.config(image="")
         self.card_image_label.image = None
         self.result_label.config(text="")
-        self.count_label.config(text="Running Count: 0")
+        self.card_number_label.config(text="Card Number: 0")
         self.auto_play_button.config(text="Start Auto-Play")
+
+    def show_stats(self):
+        """Отображает статистику тренировки."""
+        if not self.card_times:
+            self.result_label.config(text="No data available for stats.", fg="red")
+            return
+
+        total_time = sum(self.card_times)
+        avg_time = total_time / len(self.card_times)
+        max_time = max(self.card_times)
+        min_time = min(self.card_times)
+
+        stats_message = (
+            f"Deck Count: {self.deck_count}\n"
+            f"Cards Shown: {self.card_number}\n"
+            f"Total Time: {total_time:.2f} seconds\n"
+            f"Average Time per Card: {avg_time:.2f} seconds\n"
+            f"Max Time per Card: {max_time:.2f} seconds\n"
+            f"Min Time per Card: {min_time:.2f} seconds\n"
+            f"Running Count: {self.running_count}"
+        )
+
+        self.result_label.config(text=stats_message, fg="blue")
 
 if __name__ == "__main__":
     root = tk.Tk()
