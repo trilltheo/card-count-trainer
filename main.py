@@ -2,6 +2,17 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import random
 import time
+import os
+import sys
+
+def resource_path(relative_path):
+    """Получает путь к ресурсу в зависимости от того, запущен ли скрипт из .exe или нет."""
+    if hasattr(sys, '_MEIPASS'):
+        # Если приложение запущено из PyInstaller
+        return os.path.join(sys._MEIPASS, relative_path)
+    else:
+        # Если приложение запущено как скрипт
+        return os.path.join(os.path.abspath("."), relative_path)
 
 CARD_VALUES = {
     '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
@@ -126,7 +137,7 @@ class CardCountingTrainer:
 
 
         try:
-            card_image = Image.open(f"cards/{card}.png")
+            card_image = Image.open(resource_path(f"cards/{card}.png"))
             card_image = card_image.resize((150, 200))
             card_photo = ImageTk.PhotoImage(card_image)
             self.card_image_label.config(image=card_photo)
@@ -188,7 +199,7 @@ class CardCountingTrainer:
 
         try:
 
-            face_down_image = Image.open("cards/face_down.png")
+            face_down_image = Image.open(resource_path("cards/face_down.png"))
             face_down_image = face_down_image.resize((150, 200))
             face_down_photo = ImageTk.PhotoImage(face_down_image)
             self.card_image_label.config(image=face_down_photo)
