@@ -81,6 +81,13 @@ class CardCountingTrainer:
         self.stats_button = tk.Button(root, text="Show Stats", command=self.show_stats)
         self.stats_button.pack(pady=10)
 
+        # Кнопка для показа вариантов ответов
+        self.show_answer_button = tk.Button(root, text="Show Answer Options", command=self.show_answer_options)
+        self.show_answer_button.pack(pady=10)
+
+        # Список для хранения кнопок вариантов ответа
+        self.answer_buttons = []
+
     def generate_deck(self):
         """Создает колоду на основе количества выбранных колод."""
         self.deck = [f"{card}_of_{suit}" for card in CARDS for suit in SUITS] * self.deck_count
@@ -131,6 +138,39 @@ class CardCountingTrainer:
 
         self.result_label.config(text="")
         self.card_number_label.config(text=f"Card Number: {self.card_number}")
+
+    def show_answer_options(self):
+        """Показать 7 вариантов ответа."""
+        self.result_label.config(text="Choose the correct running count:", fg="blue")
+
+        # Генерация вариантов ответов
+        correct_answer = self.running_count
+        answer_choices = [correct_answer]
+
+        # Добавление 6 неправильных вариантов
+        while len(answer_choices) < 7:
+            fake_answer = correct_answer + random.randint(-10, 10)
+            if fake_answer not in answer_choices:
+                answer_choices.append(fake_answer)
+
+        random.shuffle(answer_choices)
+
+        # Удаление старых кнопок, если они есть
+        for button in self.answer_buttons:
+            button.destroy()
+
+        self.answer_buttons = []
+        for i, answer in enumerate(answer_choices):
+            button = tk.Button(self.root, text=str(answer), command=lambda ans=answer: self.check_answer(ans))
+            button.pack(pady=5)
+            self.answer_buttons.append(button)
+
+    def check_answer(self, selected_answer):
+        """Проверка выбранного ответа."""
+        if selected_answer == self.running_count:
+            self.result_label.config(text="Correct!", fg="green")
+        else:
+            self.result_label.config(text=f"Incorrect. The correct count is {self.running_count}", fg="red")
 
     def check_count(self):
         """Проверить правильность текущего счета."""
