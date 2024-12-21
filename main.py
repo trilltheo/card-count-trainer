@@ -3,7 +3,6 @@ from PIL import Image, ImageTk
 import random
 import time
 
-# Значения карт для подсчета по системе Hi-Lo
 CARD_VALUES = {
     '2': 1, '3': 1, '4': 1, '5': 1, '6': 1,
     '7': 0, '8': 0, '9': 0,
@@ -17,6 +16,7 @@ class CardCountingTrainer:
     def __init__(self, root):
         self.root = root
         self.root.title("Card Counting Trainer")
+        self.root.geometry("1000x600")  # Размер окна
 
         self.current_card = None
         self.card_number = 0
@@ -30,71 +30,69 @@ class CardCountingTrainer:
         self.start_time = None
         self.card_times = []
 
-        # Карточный интерфейс
-        self.card_image_label = tk.Label(root)
-        self.card_image_label.pack(pady=20)
+        self.card_image_label = tk.Label(root, bg="#f5f5f5")
+        self.card_image_label.place(x=125, y=20)
 
-        self.card_number_label = tk.Label(root, text="Card Number: 0", font=("Helvetica", 16))
-        self.card_number_label.pack(pady=10)
+        self.card_number_label = tk.Label(root, text="Card Number: 0", font=("Helvetica", 16), bg="#f5f5f5")
+        self.card_number_label.place(x=125, y=230)
 
-        # Кнопка для показа новой карты
-        self.new_card_button = tk.Button(root, text="Show New Card", command=self.show_new_card)
-        self.new_card_button.pack(pady=10)
+        self.new_card_button = tk.Button(root, text="Show New Card", command=self.show_new_card, font=("Helvetica", 14), bg="#4CAF50", fg="white", relief="raised", bd=5)
+        self.new_card_button.place(x=125, y=270)
 
-        # Поле ввода для проверки подсчета
         self.entry = tk.Entry(root, font=("Helvetica", 16))
-        self.entry.pack(pady=10)
+        self.entry.place(x=85, y=330)
 
-        self.check_button = tk.Button(root, text="Check Count", command=self.check_count)
-        self.check_button.pack(pady=10)
+        self.check_button = tk.Button(root, text="Check Count", command=self.check_count, font=("Helvetica", 14), bg="#2196F3", fg="white", relief="raised", bd=5)
+        self.check_button.place(x=30, y=370)
 
-        self.result_label = tk.Label(root, text="", font=("Helvetica", 14))
-        self.result_label.pack(pady=10)
+        self.result_label = tk.Label(root, text="", font=("Helvetica", 14), bg="#f5f5f5")
+        self.result_label.place(x=100, y=420)
 
-        # Автопролистывание
-        self.auto_play_button = tk.Button(root, text="Start Auto-Play", command=self.toggle_auto_play)
-        self.auto_play_button.pack(pady=10)
+        self.stats_label = tk.Label(root, text="", font=("Helvetica", 14), bg="#f5f5f5")
+        self.stats_label.place(x=600, y=270)
 
-        self.speed_label = tk.Label(root, text="Speed (ms):", font=("Helvetica", 12))
-        self.speed_label.pack()
+        self.auto_play_button = tk.Button(root, text="Start Auto-Play", command=self.toggle_auto_play, font=("Helvetica", 14), bg="#FF9800", fg="white", relief="raised", bd=5)
+        self.auto_play_button.place(x=750, y=90)
+
+        self.speed_label = tk.Label(root, text="Speed (ms):", font=("Helvetica", 12), bg="#f5f5f5")
+        self.speed_label.place(x=450, y=100)
 
         self.speed_entry = tk.Entry(root, font=("Helvetica", 12))
         self.speed_entry.insert(0, "1000")
-        self.speed_entry.pack(pady=5)
+        self.speed_entry.place(x=550, y=100)
 
-        # Выбор количества колод
-        self.deck_label = tk.Label(root, text="Number of Decks (1-8):", font=("Helvetica", 12))
-        self.deck_label.pack()
+        self.deck_label = tk.Label(root, text="Decks (1-8):", font=("Helvetica", 12), bg="#f5f5f5")
+        self.deck_label.place(x=450, y=150)
 
         self.deck_entry = tk.Entry(root, font=("Helvetica", 12))
         self.deck_entry.insert(0, "1")
-        self.deck_entry.pack(pady=5)
+        self.deck_entry.place(x=550, y=150)
 
-        self.set_deck_button = tk.Button(root, text="Set Deck Count", command=self.set_deck_count)
-        self.set_deck_button.pack(pady=10)
+        self.set_deck_button = tk.Button(root, text="Set Deck Count", command=self.set_deck_count, font=("Helvetica", 12), bg="#FF5722", fg="white", relief="raised", bd=5)
+        self.set_deck_button.place(x=750, y=140)
 
-        # Кнопка рестарта
-        self.restart_button = tk.Button(root, text="Restart", command=self.restart)
-        self.restart_button.pack(pady=10)
+        self.restart_button = tk.Button(root, text="Restart", command=self.restart, font=("Helvetica", 12), bg="#9C27B0", fg="white", relief="raised", bd=5)
+        self.restart_button.place(x=450, y=330)
 
-        # Кнопка для отображения статистики
-        self.stats_button = tk.Button(root, text="Show Stats", command=self.show_stats)
-        self.stats_button.pack(pady=10)
 
-        # Кнопка для показа вариантов ответов
-        self.show_answer_button = tk.Button(root, text="Show Answer Options", command=self.show_answer_options)
-        self.show_answer_button.pack(pady=10)
+        self.stats_button = tk.Button(root, text="Show Stats", command=self.show_stats, font=("Helvetica", 14), bg="#2196F3", fg="white", relief="raised", bd=5)
+        self.stats_button.place(x=450, y=270)
 
-        # Список для хранения кнопок вариантов ответа
+
+        self.show_answers_button = tk.Button(root, text="Show Answer Options", command=self.show_answer_options, font=("Helvetica", 14), bg="#673AB7", fg="white", relief="raised", bd=5)
+        self.show_answers_button.place(x=200, y=370)
+
         self.answer_buttons = []
 
+        self.display_face_down_card()
+
     def generate_deck(self):
-        """Создает колоду на основе количества выбранных колод."""
+
         self.deck = [f"{card}_of_{suit}" for card in CARDS for suit in SUITS] * self.deck_count
         random.shuffle(self.deck)
 
     def set_deck_count(self):
-        """Устанавливает количество колод и перезапускает игру."""
+
         try:
             count = int(self.deck_entry.get())
             if 1 <= count <= 8:
@@ -107,7 +105,7 @@ class CardCountingTrainer:
             self.result_label.config(text="Please enter a valid number.", fg="red")
 
     def show_new_card(self):
-        """Показать новую карту и обновить счет."""
+
         if not self.deck:
             self.result_label.config(text="Deck is empty! Restart or add more decks.", fg="red")
             return
@@ -126,7 +124,7 @@ class CardCountingTrainer:
         card_value = card.split("_of_")[0]
         self.running_count += CARD_VALUES.get(card_value, 0)
 
-        # Загрузка изображения карты
+
         try:
             card_image = Image.open(f"cards/{card}.png")
             card_image = card_image.resize((150, 200))
@@ -139,41 +137,8 @@ class CardCountingTrainer:
         self.result_label.config(text="")
         self.card_number_label.config(text=f"Card Number: {self.card_number}")
 
-    def show_answer_options(self):
-        """Показать 7 вариантов ответа."""
-        self.result_label.config(text="Choose the correct running count:", fg="blue")
-
-        # Генерация вариантов ответов
-        correct_answer = self.running_count
-        answer_choices = [correct_answer]
-
-        # Добавление 6 неправильных вариантов
-        while len(answer_choices) < 7:
-            fake_answer = correct_answer + random.randint(-10, 10)
-            if fake_answer not in answer_choices:
-                answer_choices.append(fake_answer)
-
-        random.shuffle(answer_choices)
-
-        # Удаление старых кнопок, если они есть
-        for button in self.answer_buttons:
-            button.destroy()
-
-        self.answer_buttons = []
-        for i, answer in enumerate(answer_choices):
-            button = tk.Button(self.root, text=str(answer), command=lambda ans=answer: self.check_answer(ans))
-            button.pack(pady=5)
-            self.answer_buttons.append(button)
-
-    def check_answer(self, selected_answer):
-        """Проверка выбранного ответа."""
-        if selected_answer == self.running_count:
-            self.result_label.config(text="Correct!", fg="green")
-        else:
-            self.result_label.config(text=f"Incorrect. The correct count is {self.running_count}", fg="red")
-
     def check_count(self):
-        """Проверить правильность текущего счета."""
+
         try:
             user_count = int(self.entry.get())
             if user_count == self.running_count:
@@ -184,7 +149,7 @@ class CardCountingTrainer:
             self.result_label.config(text="Please enter a valid number.", fg="red")
 
     def toggle_auto_play(self):
-        """Включить или выключить автопролистывание."""
+
         if self.auto_playing:
             self.auto_playing = False
             self.auto_play_button.config(text="Start Auto-Play")
@@ -194,33 +159,47 @@ class CardCountingTrainer:
             self.auto_play()
 
     def auto_play(self):
-        """Реализация автопролистывания карт."""
+
         if self.auto_playing:
             self.show_new_card()
             try:
                 speed = int(self.speed_entry.get())
             except ValueError:
-                speed = 1000  # Значение по умолчанию
+                speed = 1000
             self.root.after(speed, self.auto_play)
 
     def restart(self):
-        """Перезапустить тренировку."""
+
         self.card_number = 0
         self.running_count = 0
         self.auto_playing = False
         self.start_time = None
         self.card_times = []
         self.generate_deck()
-        self.card_image_label.config(image="")
-        self.card_image_label.image = None
+
+
+        self.display_face_down_card()
+
         self.result_label.config(text="")
         self.card_number_label.config(text="Card Number: 0")
         self.auto_play_button.config(text="Start Auto-Play")
 
+    def display_face_down_card(self):
+
+        try:
+
+            face_down_image = Image.open("cards/face_down.png")
+            face_down_image = face_down_image.resize((150, 200))
+            face_down_photo = ImageTk.PhotoImage(face_down_image)
+            self.card_image_label.config(image=face_down_photo)
+            self.card_image_label.image = face_down_photo
+        except FileNotFoundError:
+            self.card_image_label.config(text="Face down image not found", font=("Helvetica", 16))
+
     def show_stats(self):
-        """Отображает статистику тренировки."""
+
         if not self.card_times:
-            self.result_label.config(text="No data available for stats.", fg="red")
+            self.stats_label.config(text="No data available for stats.", fg="red")
             return
 
         total_time = sum(self.card_times)
@@ -238,7 +217,43 @@ class CardCountingTrainer:
             f"Running Count: {self.running_count}"
         )
 
-        self.result_label.config(text=stats_message, fg="blue")
+        self.stats_label.config(text=stats_message, fg="blue")
+
+    def show_answer_options(self):
+
+        correct_answer = self.running_count
+        incorrect_answers = set()
+
+
+        while len(incorrect_answers) < 6:
+            random_answer = correct_answer + random.randint(-5, 5)
+            if random_answer != correct_answer:
+                incorrect_answers.add(random_answer)
+
+
+        answer_options = list(incorrect_answers) + [correct_answer]
+        random.shuffle(answer_options)
+
+
+        for button in self.answer_buttons:
+            button.destroy()
+
+        self.answer_buttons.clear()
+
+
+        for idx, answer in enumerate(answer_options):
+            button = tk.Button(self.root, text=str(answer), command=lambda a=answer: self.check_answer(a),
+                               font=("Helvetica", 14), bg="#8BC34A", fg="white", relief="raised", bd=5)
+            button.place(x=60 + 40 * idx, y=450)
+            self.answer_buttons.append(button)
+
+    def check_answer(self, answer):
+
+        if answer == self.running_count:
+            self.result_label.config(text="Correct!", fg="green")
+        else:
+            self.result_label.config(text=f"Incorrect. The correct count is {self.running_count}", fg="red")
+
 
 if __name__ == "__main__":
     root = tk.Tk()
